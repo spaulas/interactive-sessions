@@ -36,7 +36,7 @@ export const AdminView: FC = () => {
   const nextQuestion = () => {
     console.log('session = ', session);
     if (session.currentQuestionIndex < session.questions.length - 1) {
-      Meteor.call('sessions.nextQuestion', session.id, (error) => {
+      Meteor.call('sessions.nextQuestion', session.id, (error: any) => {
         if (error) {
           console.error('Failed to go to next question:', error);
           alert('Failed to go to next question');
@@ -49,7 +49,7 @@ export const AdminView: FC = () => {
 
   const prevQuestion = () => {
     if (session.currentQuestionIndex > 0) {
-      Meteor.call('sessions.prevQuestion', session.id, (error) => {
+      Meteor.call('sessions.prevQuestion', session.id, (error: any) => {
         if (error) {
           console.error('Failed to go to previous question:', error);
           alert('Failed to go to previous question');
@@ -66,7 +66,7 @@ export const AdminView: FC = () => {
       'sessions.toggleActive',
       session.id,
       !session.isActive,
-      (error) => {
+      (error: any) => {
         if (error) {
           console.error('Failed to toggle session:', error);
           alert('Failed to toggle session');
@@ -80,7 +80,7 @@ export const AdminView: FC = () => {
       'sessions.resetAnswers',
       session.id,
       session.currentQuestionIndex,
-      (err) => {
+      (err: any) => {
         if (err) {
           console.error('Failed to reset answers:', err);
           alert('Failed to reset answers');
