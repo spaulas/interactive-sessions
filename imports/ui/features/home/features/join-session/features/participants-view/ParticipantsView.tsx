@@ -23,7 +23,7 @@ export const ParticipantView: FC<{ session: Session }> = ({ session }) => {
   }, [currentQuestion?.answers]);
 
   const submitAnswer = () => {
-    if (!answer || !user) return;
+    if (answer === '' || answer === null || !user) return;
 
     const newAnswer: Answer = {
       userId: user.id,

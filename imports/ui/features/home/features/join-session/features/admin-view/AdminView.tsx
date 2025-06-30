@@ -22,6 +22,10 @@ export const AdminView: FC = () => {
     };
   }, [code]);
 
+  if (isLoading) {
+    return <div>Loading session...</div>;
+  }
+
   if (!session) {
     return <div>Session not found</div>;
   }
@@ -30,22 +34,45 @@ export const AdminView: FC = () => {
   const totalAnswers = currentQuestion?.answers.length || 0;
 
   const nextQuestion = () => {
+    console.log('session = ', session);
     if (session.currentQuestionIndex < session.questions.length - 1) {
-      Meteor.call('sessions.nextQuestion', session.id);
-      setShowResults(false);
+      Meteor.call('sessions.nextQuestion', session.id, (error) => {
+        if (error) {
+          console.error('Failed to go to next question:', error);
+          alert('Failed to go to next question');
+        } else {
+          setShowResults(false);
+        }
+      });
     }
   };
 
   const prevQuestion = () => {
     if (session.currentQuestionIndex > 0) {
-      session.currentQuestionIndex--;
-      setShowResults(false);
+      Meteor.call('sessions.prevQuestion', session.id, (error) => {
+        if (error) {
+          console.error('Failed to go to previous question:', error);
+          alert('Failed to go to previous question');
+        } else {
+          setShowResults(false);
+        }
+      });
     }
   };
 
   const toggleSession = () => {
     console.log('toggle to = ', !session.isActive);
-    Meteor.call('sessions.toggleActive', session.id, !session.isActive);
+    Meteor.call(
+      'sessions.toggleActive',
+      session.id,
+      !session.isActive,
+      (error) => {
+        if (error) {
+          console.error('Failed to toggle session:', error);
+          alert('Failed to toggle session');
+        }
+      }
+    );
   };
 
   const resetAnswers = () => {
@@ -65,7 +92,7 @@ export const AdminView: FC = () => {
     );
   };
 
-  console.log(' session.isactive = ', session.isActive);
+  console.log(' session.isActive = ', session.isActive);
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 p-4'>

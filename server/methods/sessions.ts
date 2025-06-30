@@ -35,18 +35,20 @@ Meteor.methods({
     return SessionsCollection.update(sessionId, { $set: updates });
   },
 
-  'sessions.nextQuestion'(sessionId: string) {
+  async 'sessions.nextQuestion'(sessionId: string) {
     check(sessionId, String);
-    SessionsCollection.update(sessionId, {
-      $inc: { currentQuestionIndex: 1 },
-    });
+    await SessionsCollection.updateAsync(
+      { id: sessionId },
+      { $inc: { currentQuestionIndex: 1 } }
+    );
   },
 
-  'sessions.prevQuestion'(sessionId: string) {
+  async 'sessions.prevQuestion'(sessionId: string) {
     check(sessionId, String);
-    SessionsCollection.update(sessionId, {
-      $inc: { currentQuestionIndex: -1 },
-    });
+    await SessionsCollection.updateAsync(
+      { id: sessionId },
+      { $inc: { currentQuestionIndex: -1 } }
+    );
   },
 
   async 'sessions.toggleActive'(sessionId: string, newState: boolean) {
