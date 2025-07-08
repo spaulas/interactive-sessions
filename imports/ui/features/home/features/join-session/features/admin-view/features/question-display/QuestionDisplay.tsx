@@ -18,14 +18,16 @@ export const QuestionDisplay: FC<{
 
       {question.type === 'multiple-choice' && question.options && (
         <div className='space-y-4'>
-          {question.options.map((option, index) => (
-            <div
-              key={index}
-              className='bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 text-lg font-medium text-gray-800'
-            >
-              {String.fromCharCode(65 + index)}. {option}
-            </div>
-          ))}
+          {question.options.map((option, index) =>
+            option ? (
+              <div
+                key={index}
+                className='bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 text-lg font-medium text-gray-800'
+              >
+                {String.fromCharCode(65 + index)}. {option}
+              </div>
+            ) : null
+          )}
         </div>
       )}
 

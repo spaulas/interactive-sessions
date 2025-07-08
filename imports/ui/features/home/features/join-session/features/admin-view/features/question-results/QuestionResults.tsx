@@ -27,43 +27,45 @@ export const QuestionResults: FC<{ question: Question }> = ({ question }) => {
           📊 Results
         </h3>
         <div className='space-y-4'>
-          {results.map((result, index) => (
-            <div
-              key={index}
-              className={`rounded-xl p-4 ${
-                result.isCorrect && question.showCorrectAnswer
-                  ? 'bg-green-100 border-2 border-green-300'
-                  : 'bg-gray-100'
-              }`}
-            >
-              <div className='flex items-center justify-between mb-2'>
-                <span className='font-medium'>
-                  {String.fromCharCode(65 + index)}. {result.option}
-                  {result.isCorrect && question.showCorrectAnswer && ' ✅'}
-                </span>
-                <span className='font-bold text-purple-600'>
-                  {result.count} ({result.percentage.toFixed(1)}%)
-                </span>
-              </div>
-
-              <div className='w-full bg-gray-200 rounded-full h-3 mb-2'>
-                <div
-                  className={`h-3 rounded-full transition-all duration-500 ${
-                    result.isCorrect && question.showCorrectAnswer
-                      ? 'bg-green-500'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                  }`}
-                  style={{ width: `${result.percentage}%` }}
-                />
-              </div>
-
-              {question.showWhoVoted && result.voters.length > 0 && (
-                <div className='text-sm text-gray-600 mt-2'>
-                  👥 {result.voters.join(', ')}
+          {results.map((result, index) =>
+            result.option ? (
+              <div
+                key={index}
+                className={`rounded-xl p-4 ${
+                  result.isCorrect && question.showCorrectAnswer
+                    ? 'bg-green-100 border-2 border-green-300'
+                    : 'bg-gray-100'
+                }`}
+              >
+                <div className='flex items-center justify-between mb-2'>
+                  <span className='font-medium'>
+                    {String.fromCharCode(65 + index)}. {result.option}
+                    {result.isCorrect && question.showCorrectAnswer && ' ✅'}
+                  </span>
+                  <span className='font-bold text-purple-600'>
+                    {result.count} ({result.percentage.toFixed(1)}%)
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
+
+                <div className='w-full bg-gray-200 rounded-full h-3 mb-2'>
+                  <div
+                    className={`h-3 rounded-full transition-all duration-500 ${
+                      result.isCorrect && question.showCorrectAnswer
+                        ? 'bg-green-500'
+                        : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                    }`}
+                    style={{ width: `${result.percentage}%` }}
+                  />
+                </div>
+
+                {question.showWhoVoted && result.voters.length > 0 && (
+                  <div className='text-sm text-gray-600 mt-2'>
+                    👥 {result.voters.join(', ')}
+                  </div>
+                )}
+              </div>
+            ) : null
+          )}
         </div>
       </div>
     );

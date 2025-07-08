@@ -14,13 +14,33 @@ export const ParticipantView: FC<{ session: Session }> = ({ session }) => {
 
   const currentQuestion = session.questions[session.currentQuestionIndex];
 
-  // New effect: Reset local answer state if currentQuestion.answers is cleared (reset by admin)
+  // Reset answer state when the question changes (when admin navigates to next/prev question)
   useEffect(() => {
-    if (currentQuestion && currentQuestion.answers.length === 0) {
-      setAnswer('');
-      setHasAnswered(false);
+    if (currentQuestion && user) {
+      // Check if the current user has already answered this specific question
+      const userAnswer = currentQuestion.answers.find(
+        (a) => a.userId === user.id
+      );
+
+      if (userAnswer) {
+        // User has already answered this question, restore their answer
+        setAnswer(userAnswer.answer);
+        setHasAnswered(true);
+      } else {
+        // User hasn't answered this question yet, reset the state
+        setAnswer(currentQuestion.type === 'multiple-choice' ? null : '');
+        setHasAnswered(false);
+      }
     }
-  }, [currentQuestion?.answers]);
+  }, [session.currentQuestionIndex, user]); // Depend on currentQuestionIndex instead of answers
+
+  // Alternative approach - if you want to reset whenever answers are cleared by admin
+  // useEffect(() => {
+  //   if (currentQuestion && currentQuestion.answers.length === 0) {
+  //     setAnswer(currentQuestion.type === 'multiple-choice' ? null : '');
+  //     setHasAnswered(false);
+  //   }
+  // }, [currentQuestion?.answers.length]);
 
   const submitAnswer = () => {
     if (answer === '' || answer === null || !user) return;
