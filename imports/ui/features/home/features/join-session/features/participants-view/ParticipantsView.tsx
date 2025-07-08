@@ -125,24 +125,26 @@ export const ParticipantView: FC<{ session: Session }> = ({ session }) => {
 
         {currentQuestion.type === 'multiple-choice' ? (
           <div className='space-y-2'>
-            {currentQuestion.options?.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => setAnswer(index)}
-                disabled={hasAnswered}
-                className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
-                  answer === index
-                    ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-200 hover:border-purple-300'
-                } ${
-                  hasAnswered
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:bg-purple-50'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
+            {currentQuestion.options?.map((option, index) =>
+              option ? (
+                <button
+                  key={index}
+                  onClick={() => setAnswer(index)}
+                  disabled={hasAnswered}
+                  className={`w-full p-3 rounded-xl border-2 transition-all text-left ${
+                    answer === index
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-purple-300'
+                  } ${
+                    hasAnswered
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-purple-50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ) : null
+            )}
           </div>
         ) : (
           <KawaiiInput
