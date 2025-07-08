@@ -13,3 +13,8 @@ Meteor.publish('sessions.byAdminId', function (adminId: string) {
   check(adminId, String); // optional but recommended for validation
   return SessionsCollection.find({ adminId });
 });
+
+Meteor.publish('sessions.byId', function (sessionId: string) {
+  check(sessionId, String);
+  return SessionsCollection.find({ id: sessionId });
+});

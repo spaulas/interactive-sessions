@@ -74,7 +74,7 @@ export const MySessionsPage: FC = () => {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {mySessions.map((session) => (
                 <div
-                  key={session._id}
+                  key={session.id}
                   className='bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200'
                 >
                   <div className='flex items-center justify-between mb-4'>
@@ -116,7 +116,7 @@ export const MySessionsPage: FC = () => {
                       🎮 Manage
                     </KawaiiButton>
                     <KawaiiButton
-                      onClick={() => navigate(`/edit-session/${session._id}`)}
+                      onClick={() => navigate(`/edit-session/${session.id}`)}
                       variant='secondary'
                       className='flex-1'
                     >

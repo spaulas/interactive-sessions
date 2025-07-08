@@ -1,17 +1,24 @@
-import { useState } from 'react';
-import React from 'react';
-import type { FC } from 'react';
+import React, { useState } from 'react';
+import { FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor';
 import { KawaiiButton } from '../../../../../../common-ui/kawaii-button/KawaiiButton';
 import { KawaiiInput } from '../../../../../../common-ui/kawaii-input/KawaiiInput';
 import { QuestionEditor } from '../question-editor/QuestionEditor';
-import { mockData } from '../../../../../../auth-context/AuthContext.default';
-import { generateId } from '../../../../../../auth-context/utils/generateId';
+import { SessionsCollection } from '../../../../../../../api/sessions';
 
 export const EditSessionPage: FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const session = mockData.sessions.find((s) => s.id === sessionId);
+
+  const { session, isLoading } = useTracker(() => {
+    const h = Meteor.subscribe('sessions.byId', sessionId);
+    return {
+      session: SessionsCollection.findOne({ id: sessionId }),
+      isLoading: !h.ready(),
+    };
+  }, [sessionId]);
 
   const [title, setTitle] = useState(session?.title || '');
   const [questions, setQuestions] = useState<Question[]>(
@@ -19,15 +26,14 @@ export const EditSessionPage: FC = () => {
   );
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
+  if (isLoading) return <div>Loading…</div>;
   if (!session) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 p-4 flex items-center justify-center'>
-        <div className='bg-white rounded-3xl shadow-2xl p-8 text-center'>
-          <h2 className='text-2xl font-bold text-red-600 mb-4'>
-            ❌ Session Not Found
-          </h2>
+      <div className='min-h-screen bg-gradient-to-br ...'>
+        <div className='bg-white ...'>
+          <h2>❌ Session Not Found</h2>
           <KawaiiButton onClick={() => navigate('/my-sessions')}>
-            📋 Back to My Sessions
+            Back
           </KawaiiButton>
         </div>
       </div>
@@ -35,91 +41,91 @@ export const EditSessionPage: FC = () => {
   }
 
   const addQuestion = () => {
-    const newQuestion: Question = {
-      id: generateId(),
-      type: 'multiple-choice',
-      question: '',
-      options: ['', '', '', ''],
-      correctAnswer: undefined,
-      answers: [],
-      showCorrectAnswer: true,
-      showWhoVoted: false,
-    };
-    setQuestions([...questions, newQuestion]);
+    setQuestions((prev) => [
+      ...prev,
+      {
+        id: Random.id(),
+        type: 'multiple-choice',
+        question: '',
+        options: ['', '', '', ''],
+        answers: [],
+        showCorrectAnswer: true,
+        showWhoVoted: false,
+      },
+    ]);
     setEditingIndex(questions.length);
   };
 
-  const updateQuestion = (index: number, updatedQuestion: Question) => {
-    const newQuestions = [...questions];
-    newQuestions[index] = updatedQuestion;
-    setQuestions(newQuestions);
+  const updateQuestion = (i: number, updated: Question) => {
+    setQuestions((prev) => {
+      const arr = [...prev];
+      arr[i] = updated;
+      return arr;
+    });
   };
 
-  const deleteQuestion = (index: number) => {
-    setQuestions(questions.filter((_, i) => i !== index));
+  const deleteQuestion = (i: number) => {
+    setQuestions((prev) => prev.filter((_, idx) => idx !== i));
     setEditingIndex(null);
   };
 
   const saveSession = () => {
-    if (!title.trim()) return;
-
-    session.title = title;
-    session.questions = questions.filter((q) => q.question.trim());
-
-    navigate('/my-sessions');
+    const cleanQuestions = questions.filter((q) => q.question.trim());
+    Meteor.call(
+      'sessions.update',
+      session._id,
+      { title, questions: cleanQuestions },
+      (err) => {
+        if (err) alert(`Save failed: ${err.message}`);
+        else navigate('/my-sessions');
+      }
+    );
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 p-4'>
+    <div className='min-h-screen bg-gradient-to-br ...'>
       <div className='max-w-4xl mx-auto'>
-        <div className='bg-white rounded-3xl shadow-2xl p-8'>
-          <div className='flex items-center justify-between mb-8'>
-            <h1 className='text-3xl font-bold text-purple-600'>
-              ✏️ Edit Session
-            </h1>
+        <div className='bg-white ...'>
+          <div className='flex justify-between mb-8'>
+            <h1>✏️ Edit Session</h1>
             <KawaiiButton
-              onClick={() => navigate('/my-sessions')}
               variant='secondary'
+              onClick={() => navigate('/my-sessions')}
             >
-              📋 Back to Sessions
+              Back
             </KawaiiButton>
           </div>
 
-          <div className='mb-6'>
-            <KawaiiInput
-              placeholder='Session title 🎪'
-              value={title}
-              onChange={setTitle}
-            />
-          </div>
+          <KawaiiInput
+            placeholder='Session title 🎪'
+            value={title}
+            onChange={setTitle}
+          />
 
-          <div className='mb-6'>
-            <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl font-bold text-purple-600'>
-                Questions 📝
-              </h2>
+          <div className='mt-6'>
+            <div className='flex justify-between mb-4'>
+              <h2>Questions 📝</h2>
               <KawaiiButton onClick={addQuestion}>➕ Add Question</KawaiiButton>
             </div>
-
             <div className='space-y-4'>
-              {questions.map((question, index) => (
+              {questions.map((q, i) => (
                 <QuestionEditor
-                  key={question.id}
-                  question={question}
-                  index={index}
-                  isEditing={editingIndex === index}
-                  onEdit={() => setEditingIndex(index)}
-                  onSave={(updatedQuestion) => {
-                    updateQuestion(index, updatedQuestion);
+                  key={q.id}
+                  question={q}
+                  index={i}
+                  isEditing={editingIndex === i}
+                  onEdit={() => setEditingIndex(i)}
+                  onSave={(updated) => {
+                    updateQuestion(i, updated);
                     setEditingIndex(null);
                   }}
-                  onDelete={() => deleteQuestion(index)}
+                  onDelete={() => deleteQuestion(i)}
                 />
               ))}
             </div>
           </div>
 
-          <div className='flex justify-end'>
+          <div className='flex justify-end mt-6'>
             <KawaiiButton onClick={saveSession} disabled={!title.trim()}>
               💾 Save Changes
             </KawaiiButton>

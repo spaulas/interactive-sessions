@@ -26,13 +26,9 @@ Meteor.methods({
   'sessions.update'(sessionId: string, updates: Partial<Session>) {
     check(sessionId, String);
     check(updates, Object);
-
-    const session = SessionsCollection.findOne(sessionId);
-    if (!session) {
-      throw new Meteor.Error('Session not found');
-    }
-
-    return SessionsCollection.update(sessionId, { $set: updates });
+    const session = SessionsCollection.findOne({ _id: sessionId });
+    if (!session) throw new Meteor.Error('not-found', 'Session not found');
+    SessionsCollection.update(sessionId, { $set: updates });
   },
 
   async 'sessions.nextQuestion'(sessionId: string) {
